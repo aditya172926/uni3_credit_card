@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
 export default function Create() {
+    const address = "qqqqqqqqqqq";
     const [form, setForm] = useState({
         name: "",
         user_address: "",
         blockexplorer_link: ""
     });
+
+    const [contactExist, setContactExist] = useState(false);
+    const [contactsToAdd, setContactsToAdd] = useState([]);
+    const [currentUserId, setCurrentUserId] = useState(0);
+
     const navigate = useNavigate();
+    const params = useParams();
+
 
     // these methods will update the state variables
     function updateForm(value) {
@@ -16,19 +24,45 @@ export default function Create() {
         });
     }
 
+    async function getresp() {
+        const response = await fetch(`http://localhost:5000/record/${address}`);
+        const result = await response.json();
+        console.log(result);
+        if (result.contacts.length > 0) {
+            setContactsToAdd(result.contacts);
+            setCurrentUserId(result._id);
+            setContactExist(true);
+        }
+    }
+
     async function onSubmit(e) {
         e.preventDefault();
 
         // When a post request is sent to the create url, we'll add a new record to the database.
         const newPerson = { ...form };
-        await fetch("http://localhost:5000/record/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", },
-            body: JSON.stringify(newPerson)
-        }).catch(error => {
-            window.alert(error);
-            return;
-        });
+        setContactsToAdd(contactsToAdd.push(newPerson));
+
+        if (contactExist == true) {
+            // if contacts already present, then updating
+            await fetch(`http://localhost:5000/update/${currentUserId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", },
+                body: JSON.stringify({ contactsToAdd, connectedAddress: address })
+            }).catch(error => {
+                window.alert(error);
+                return;
+            });
+        } else {
+            // if no contacts then adding a new entry
+            await fetch("http://localhost:5000/record/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", },
+                body: JSON.stringify({ contactsToAdd, connectedAddress: address })
+            }).catch(error => {
+                window.alert(error);
+                return;
+            });
+        }
         setForm({ name: "", user_address: "", blockexplorer_link: "" });
         navigate("/");
     }
@@ -76,6 +110,7 @@ export default function Create() {
                     />
                 </div>
             </form>
+            <button className='btn btn-primary' onClick={getresp}>test</button>
         </div>
     )
 }
