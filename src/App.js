@@ -1,16 +1,23 @@
 import logo from './logo.svg';
 import './App.css';
+import { Route, Routes } from "react-router-dom";
+
+import Navbar from "./Components/navbar";
+import RecordList from "./Components/recordList";
+import Edit from "./Components/edit";
+import Create from "./Components/create";
 
 function App() {
   return (
     <>
-      <nav class="navbar bg-light">
-        <div class="container-fluid">
-          <span class="navbar-brand mb-0 h1">Uni3</span>
-        </div>
-      </nav>
-
-      
+      <div>
+        <Navbar />
+        <Routes>
+          <Route exact path="/" element={<RecordList />} />
+          <Route path="/edit/:id" element={<Edit />} />
+          <Route path="/create" element={<Create />} />
+        </Routes>
+      </div>
     </>
   );
 }

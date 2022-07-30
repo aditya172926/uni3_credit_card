@@ -49,21 +49,21 @@ export default function Create() {
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="position">Address</label>
+                    <label htmlFor="user_address">Address</label>
                     <input
                         type="text"
                         className="form-control"
-                        id="position"
+                        id="user_address"
                         value={form.user_address}
                         onChange={(e) => updateForm({ user_address: e.target.value })}
                     />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="position">Block explorer Link</label>
+                    <label htmlFor="blockexplorer_link">Block explorer Link</label>
                     <input
                         type="text"
                         className="form-control"
-                        id="position"
+                        id="blockexplorer_link"
                         value={form.blockexplorer_link}
                         onChange={(e) => updateForm({ blockexplorer_link: e.target.value })}
                     />
