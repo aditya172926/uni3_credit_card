@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 export default function Create() {
+
+    const localHostAPI = "http://localhost:5000/";
+    const deployedAPI = "https://calm-gold-cougar-hem.cyclic.app/"
+
     const address = "qqqqqqqqqqq";
     const [form, setForm] = useState({
         name: "",
@@ -25,7 +29,7 @@ export default function Create() {
     }
 
     async function getresp() {
-        const response = await fetch(`http://localhost:5000/record/${address}`);
+        const response = await fetch(`https://calm-gold-cougar-hem.cyclic.app/record/${address}`);
         const result = await response.json();
         console.log(result);
         if (result.contacts.length > 0) {
@@ -44,7 +48,7 @@ export default function Create() {
 
         if (contactExist == true) {
             // if contacts already present, then updating
-            await fetch(`http://localhost:5000/update/${currentUserId}`, {
+            await fetch(`https://calm-gold-cougar-hem.cyclic.app/update/${currentUserId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", },
                 body: JSON.stringify({ contactsToAdd, connectedAddress: address })
@@ -54,7 +58,7 @@ export default function Create() {
             });
         } else {
             // if no contacts then adding a new entry
-            await fetch("http://localhost:5000/record/add", {
+            await fetch("https://calm-gold-cougar-hem.cyclic.app/record/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", },
                 body: JSON.stringify({ contactsToAdd, connectedAddress: address })
