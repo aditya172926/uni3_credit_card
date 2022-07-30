@@ -30,7 +30,7 @@ export default function RecordList() {
     // This method fetches the records from the database.
     useEffect(() => {
         async function getRecords() {
-            const response = await fetch(`https://calm-gold-cougar-hem.cyclic.app/record/${address}`);            
+            const response = await fetch(`https://uni3server.herokuapp.com/record/${address}`);            
             if (!response.ok) {
                 const message = `An error occurred: ${response.statusText}`;
                 window.alert(message);

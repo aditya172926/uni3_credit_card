@@ -5,6 +5,7 @@ export default function Create() {
 
     const localHostAPI = "http://localhost:5000/";
     const deployedAPI = "https://calm-gold-cougar-hem.cyclic.app/"
+    const herokuAPI = "https://uni3server.herokuapp.com/";
 
     const address = "qqqqqqqqqqq";
     const [form, setForm] = useState({
@@ -29,7 +30,7 @@ export default function Create() {
     }
 
     async function getresp() {
-        const response = await fetch(`https://calm-gold-cougar-hem.cyclic.app/record/${address}`);
+        const response = await fetch(`https://uni3server.herokuapp.com/record/${address}`);
         const result = await response.json();
         console.log(result);
         if (result.contacts.length > 0) {
@@ -48,9 +49,9 @@ export default function Create() {
 
         if (contactExist == true) {
             // if contacts already present, then updating
-            await fetch(`https://calm-gold-cougar-hem.cyclic.app/update/${currentUserId}`, {
+            await fetch(`https://uni3server.herokuapp.com/update/${currentUserId}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", },
+                headers: { "Content-Type": "application/json"},
                 body: JSON.stringify({ contactsToAdd, connectedAddress: address })
             }).catch(error => {
                 window.alert(error);
@@ -58,7 +59,7 @@ export default function Create() {
             });
         } else {
             // if no contacts then adding a new entry
-            await fetch("https://calm-gold-cougar-hem.cyclic.app/record/add", {
+            await fetch("https://uni3server.herokuapp.com/record/add", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", },
                 body: JSON.stringify({ contactsToAdd, connectedAddress: address })
