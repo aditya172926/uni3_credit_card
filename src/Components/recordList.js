@@ -5,12 +5,15 @@ const Record = (props) => (
     <>
         <div className="accordion-item">
             <h2 className="accordion-header" id={props.record.user_address}>
-                <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target={props.accordion_id} aria-expanded="false" aria-controls={props.control_accordion}>
+                <button className="accordion-button collapsed" style={{ backgroundColor: "#3B0847", color: "white" }}
+                    type="button" data-bs-toggle="collapse" data-bs-target={props.accordion_id}
+                    aria-expanded="false" aria-controls={props.control_accordion}>
                     {props.record.name}
                 </button>
             </h2>
             <div id={props.control_accordion} className="accordion-collapse collapse" aria-labelledby={props.record.user_address} data-bs-parent="#contacts_accordion">
                 <div className="accordion-body">{props.record.user_address}</div>
+                <a href={props.record.blockexplorer_link} target="_blank" rel="noreferrer" role="button">Block Link</a>
             </div>
         </div>
         {/* <li className="list-group-item">{props.record.name}</li> */}
@@ -82,16 +85,16 @@ export default function RecordList(props) {
                 // <Record record={record.name} deleteRecord={() => deleteRecord(record._id)} key={record._id} />
                 <Record record={record} key={record.user_address} accordion_id={accordion_id} control_accordion={control_accordion} />
             );
-    });
-}
+        });
+    }
 
-// This following section will display the table with the records of individuals.
-return (
-    <div>
-        <h3>Contacts</h3>
-        <div className="accordion accordion-flush" id="contacts_accordion">
-            {recordList()}
+    // This following section will display the table with the records of individuals.
+    return (
+        <div>
+            <h3>Contacts</h3>
+            <div className="accordion accordion-flush" style={{ backgroundColor: "#3B0847" }} id="contacts_accordion">
+                {recordList()}
+            </div>
         </div>
-    </div>
-);
+    );
 }
