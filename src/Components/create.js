@@ -5,9 +5,9 @@ export default function Create() {
 
     const localHostAPI = "http://localhost:5000/";
     const deployedAPI = "https://calm-gold-cougar-hem.cyclic.app/"
-    const herokuAPI = "https://uni3server.herokuapp.com/";
+    const herokuAPI = "https://uni3server.herokuapp.com";
 
-    const address = "qqqqqqqqqqq";
+    const address = "bbbbbbbbbbb";
     const [form, setForm] = useState({
         name: "",
         user_address: "",
@@ -30,7 +30,7 @@ export default function Create() {
     }
 
     async function getresp() {
-        const response = await fetch(`https://uni3server.herokuapp.com/record/${address}`);
+        const response = await fetch(`${herokuAPI}/record/${address}`);
         const result = await response.json();
         console.log(result);
         if (result.contacts.length > 0) {
@@ -49,7 +49,7 @@ export default function Create() {
 
         if (contactExist == true) {
             // if contacts already present, then updating
-            await fetch(`https://uni3server.herokuapp.com/update/${currentUserId}`, {
+            await fetch(`${herokuAPI}/update/${currentUserId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
                 body: JSON.stringify({ contactsToAdd, connectedAddress: address })
@@ -59,7 +59,7 @@ export default function Create() {
             });
         } else {
             // if no contacts then adding a new entry
-            await fetch("https://uni3server.herokuapp.com/record/add", {
+            await fetch(`${herokuAPI}/record/add`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", },
                 body: JSON.stringify({ contactsToAdd, connectedAddress: address })
