@@ -37,15 +37,20 @@ const Record = (props) => (
     // </tr>
 );
 
-export default function RecordList() {
+export default function RecordList(props) {
     const [records, setRecords] = useState([]);
-    const address = "qqqqqqqqqqq";
+    const address = "bbbbbbbbbbb";
+    const addressInd = props.addressInd.toString();
+    console.log(window.addressInd);
+    console.log(addressInd);
+    console.log(addressInd.type);
+    console.log("Fetch contacts of this address ", addressInd);
     const herokuAPI = "https://uni3server.herokuapp.com";
 
     // This method fetches the records from the database.
     useEffect(() => {
         async function getRecords() {
-            const response = await fetch(`${herokuAPI}/record/${address}`);
+            const response = await fetch(`https://uni3server.herokuapp.com/record/${addressInd}`);
             if (!response.ok) {
                 const message = `An error occurred: ${response.statusText}`;
                 window.alert(message);

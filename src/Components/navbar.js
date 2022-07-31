@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-export default function Navbar() {
+export default function Navbar(props) {
     return (
         <div>
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -26,6 +26,12 @@ export default function Navbar() {
                             <NavLink className="nav-link" to="/create">
                                 Create Record
                             </NavLink>
+                        </li>
+                        <li className="nav-item">
+                            {props.connectedAddress}
+                        </li>
+                        <li className="nav-item">
+                            {parseFloat(props.userBalance).toFixed(2)}
                         </li>
                     </ul>
                 </div>
