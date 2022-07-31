@@ -1,9 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 export default function Navbar(props) {
+
+    const changeNetwork = async (chainId) => {
+        if (props.currentNetwork.chainId == chainId) {
+            console.log("You are on the same chain");
+            return;
+        }
+        if (chainId == "0x5") {
+            try {
+                await window.ethereum.request({
+                    method: "wallet_switchEthereumChain",
+                    params: [{ chainId: chainId }],
+                });
+            } catch (switchError) {
+                window.ethereum.request({
+                    method: "wallet_addEthereumChain",
+                    params: [{
+                        chainId: "0x5",
+                        rpcUrls: ["https://goerli.infura.io/v3/"],
+                        chainName: "Goerli Test Network",
+                        nativeCurrency: {
+                            name: "GoerliETH",
+                            symbol: "GoerliETH",
+                            decimals: 18
+                        },
+                        blockExplorerUrls: ["https://goerli.etherscan.io"]
+                    }]
+                });
+            }
+        }
+        if (chainId == "0x13881") {
+            window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                    chainId: "0x13881",
+                    rpcUrls: ["https://rpc-mumbai.maticvigil.com"],
+                    chainName: "Mumbai Testnet",
+                    nativeCurrency: {
+                        name: "MATIC",
+                        symbol: "MATIC",
+                        decimals: 18
+                    },
+                    blockExplorerUrls: ["https://polygonscan.com/"]
+                }]
+            });
+        }
+    }
+
     return (
-        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-2">
             <div className="container-fluid">
                 <NavLink className="navbar-brand" to="/">
                     Uni3
@@ -21,33 +68,47 @@ export default function Navbar(props) {
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul className="navbar-nav ml-auto">
-                        <li className="nav-item">
-                            <NavLink className="nav-link" to="/create">
-                                Create Record
-                            </NavLink>
-                        </li>
-                        <li className="nav-item">
-                            {props.connectedAddress}
-                        </li>
-                        <li className="nav-item">
-                            {parseFloat(props.userBalance).toFixed(2)}
-                        </li>
-                        <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Balance
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li><a className="dropdown-item" href="#">ETH - {props.balances.eth}</a></li>
-                                <li><a className="dropdown-item" href="#">USDc - {props.balances.usdc}</a></li>
-                                <li><a className="dropdown-item" href="#">UNI - {props.balances.UNI}</a></li>
-                            </ul>
-                        </li>
-                    </ul>
+                <div className="d-flex" id="navbarSupportedContent">
+                    <div className="dropdown">
+                        <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {props.currentNetwork.networkName}
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-start">
+                            <li>
+                                <button className='btn btn-success dropdown-item' onClick={() => changeNetwork("0x13881")}>Polygon Mumbai</button>
+                            </li>
+                            <li>
+                                <button className='btn btn-success dropdown-item' onClick={() => changeNetwork("0x5")}>Ethereum Goreli</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul className="navbar-nav ml-auto">
+                            <li className="nav-item">
+                                <NavLink className="nav-link" to="/create">
+                                    Add Contact
+                                </NavLink>
+                            </li>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Balance
+                                </a>
+                                <ul className="dropdown-menu dropdown-menu-dark">
+                                    <li><a className="dropdown-item" href="#">ETH - {parseFloat(props.balances.eth).toFixed(4)}</a></li>
+                                    <li><a className="dropdown-item" href="#">USDc - {props.balances.usdc}</a></li>
+                                    <li><a className="dropdown-item" href="#">UNI - {props.balances.UNI}</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="card" style={{ height: "26px", marginTop: "7px" }}>
+                        <div className="card-body py-0">
+                            {props.connectedAddress.substring(0, 8)}...{props.connectedAddress.substring(38)}
+                        </div>
+                    </div>
+
                 </div>
             </div>
-
         </nav>
     );
 }

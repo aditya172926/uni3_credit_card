@@ -22,6 +22,10 @@ function App() {
     usdc: 0.00,
     uni: 0.00
   });
+  const [currentNetwork, setCurrentNetwork] = useState({
+    networkName: "",
+    chainId: ""
+  });
 
 
   const connectWallet = async () => {
@@ -34,8 +38,17 @@ function App() {
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       console.log("Connected to account, ", accounts[0]);
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      if (chainId != "0x5")
-        alert("Please switch to Ethereum Goreli testnet");
+      if (chainId != "0x5" && chainId != "0x13881") {
+        alert("Please switch to Ethereum Goreli or Polygon Mumbai testnet");
+        setCurrentNetwork({ networkName: "", chainId: "0x0" });
+      }
+      if (chainId == "0x5")
+        await setCurrentNetwork({ networkName: "Goreli", chainId: chainId });
+      if (chainId == "0x13881")
+        await setCurrentNetwork({ networkName: "Mumbai", chainId: chainId });
+
+      console.log("The current network stats", currentNetwork);
+
       await setConnectedAddress(accounts[0]);
       let addressInd = accounts[0].toString().substring(30);
       window.addressInd = addressInd;
@@ -58,7 +71,15 @@ function App() {
       console.log("We have the ethereum object", ethereum);
     }
     const accounts = await ethereum.request({ method: "eth_accounts" });
-    const chain = await window.ethereum.request({ method: "eth_chainId" });
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    if (chainId !== "0x5" && chainId !== "0x13881") {
+      alert("Please switch to Ethereum Goreli or Polygon Mumbai testnet");
+      setCurrentNetwork({ networkName: "", chainId: "0x0" });
+    }
+    if (chainId == "0x5")
+      await setCurrentNetwork({ networkName: "Goreli", chainId: chainId });
+    if (chainId == "0x13881")
+      await setCurrentNetwork({ networkName: "Mumbai", chainId: chainId });
     const provider = await new ethers.providers.Web3Provider(ethereum);
 
     let eth_balance;
@@ -106,8 +127,9 @@ function App() {
 
   return (
     <>
-      <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances = {tokenBalances} />
+      <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances={tokenBalances} currentNetwork={currentNetwork} />
       <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
+
       <div className='container-fluid m-0'>
         <div className='row'>
           {walletConnected ? (
