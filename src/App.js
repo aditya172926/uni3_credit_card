@@ -9,12 +9,19 @@ import Edit from "./Components/edit";
 import Create from "./Components/create";
 import { useEffect, useState } from 'react';
 
+const erc20_abi = require('./utils/erc20_abi.json');
+
 function App() {
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");
   const [userBalance, setUserBalance] = useState(0.0);
   const [addressIndex, setAddressIndex] = useState("");
+  const [tokenBalances, setTokenBalances] = useState({
+    eth: 0.00,
+    usdc: 0.00,
+    uni: 0.00
+  });
 
 
   const connectWallet = async () => {
@@ -41,6 +48,7 @@ function App() {
     }
   }
 
+  // check if wallet is already connected
   const checkIfWalletisConnected = async () => {
     const { ethereum } = window;
     if (!ethereum) {
@@ -52,11 +60,18 @@ function App() {
     const accounts = await ethereum.request({ method: "eth_accounts" });
     const chain = await window.ethereum.request({ method: "eth_chainId" });
     const provider = await new ethers.providers.Web3Provider(ethereum);
+
+    let eth_balance;
+    let USDc_balance;
+    let UNI_balance;
+
     await provider.getBalance(accounts[0]).then((balance) => {
       setUserBalance(ethers.utils.formatEther(balance));
-      console.log(balance);
+      eth_balance = ethers.utils.formatEther(balance);
+      console.log("Balance of ETH ", ethers.utils.formatEther(balance));
       console.log(userBalance); // printing the balance of the current connected account
     });
+
     if (accounts.length !== 0) {
       const account = accounts[0];
       console.log("Found an authorized account:", account);
@@ -64,6 +79,22 @@ function App() {
       await setAddressIndex(addressInd);
       await setConnectedAddress(account);
       await setWalletConnected(true);
+
+      // getting token balance
+      const USDc_token = "0x07865c6e87b9f70255377e024ace6630c1eaa37f"; // for goreli testnet
+      const USDc_contract = new ethers.Contract(USDc_token, erc20_abi, provider);
+      await USDc_contract.balanceOf(accounts[0]).then((balance) => {
+        USDc_balance = (((balance.toNumber()) * (10 ** (-6)))).toFixed(2);
+        console.log("USDc balance is ", USDc_balance);
+      });
+
+      setTokenBalances({
+        eth: eth_balance,
+        usdc: USDc_balance,
+        uni: UNI_balance
+      });
+      console.log(tokenBalances);
+
     } else {
       console.log("No authorized account found");
     }
@@ -75,27 +106,27 @@ function App() {
 
   return (
     <>
-      <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} />
+      <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances = {tokenBalances} />
       <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
       <div className='container-fluid m-0'>
         <div className='row'>
           {walletConnected ? (
             <>
-            <div className='col-4'>
-            <Routes>
-              <Route exact path="/" element={<RecordList address = {connectedAddress} addressInd = {addressIndex} />} />
-            </Routes>
-          </div>
-          <div className='col-8'>
-            lending borrowing stuff
-          </div>
-          </>
+              <div className='col-4'>
+                <Routes>
+                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} />} />
+                </Routes>
+              </div>
+              <div className='col-8'>
+                lending borrowing stuff
+              </div>
+            </>
           ) : (<></>)}
         </div>
       </div>
       <Routes>
         <Route path="/edit/:id" element={<Edit />} />
-        <Route path="/create" element={<Create address = {connectedAddress} addressInd = {addressIndex} />} />
+        <Route path="/create" element={<Create address={connectedAddress} addressInd={addressIndex} />} />
       </Routes>
     </>
   );
