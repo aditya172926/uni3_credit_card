@@ -24,7 +24,7 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "borrwoer",
+				"name": "borrower",
 				"type": "address"
 			},
 			{
@@ -89,9 +89,9 @@
 				"type": "address"
 			},
 			{
-				"internalType": "uint32",
+				"internalType": "uint16",
 				"name": "_amount",
-				"type": "uint32"
+				"type": "uint16"
 			}
 		],
 		"name": "initiateBorrowRequest",
@@ -184,6 +184,19 @@
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBorrowRequests",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
 			}
 		],
 		"stateMutability": "view",

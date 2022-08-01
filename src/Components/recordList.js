@@ -12,8 +12,10 @@ const Record = (props) => (
                 </button>
             </h2>
             <div id={props.control_accordion} className="accordion-collapse collapse" aria-labelledby={props.record.user_address} data-bs-parent="#contacts_accordion">
-                <div className="accordion-body">{props.record.user_address}</div>
-                <a href={props.record.blockexplorer_link} target="_blank" rel="noreferrer" role="button">Block Link</a>
+                <div className="d-flex align-items-center">
+                    <div className="accordion-body">{props.record.user_address.substring(0, 8)}...{props.record.user_address.substring(38)}</div>
+                    <a href={props.block_explorer_link} target="_blank" rel="noreferrer" role="button"><button className="btn btn-primary">Open</button></a>
+                </div>
             </div>
         </div>
         {/* <li className="list-group-item">{props.record.name}</li> */}
@@ -81,9 +83,10 @@ export default function RecordList(props) {
         return records.map((record) => {
             let accordion_id = "#collapse" + record.user_address;
             let control_accordion = "collapse" + record.user_address;
+            let block_explorer_link = `https://goerli.etherscan.io/address/${record.user_address}`;
             return (
                 // <Record record={record.name} deleteRecord={() => deleteRecord(record._id)} key={record._id} />
-                <Record record={record} key={record.user_address} accordion_id={accordion_id} control_accordion={control_accordion} />
+                <Record record={record} key={record.user_address} accordion_id={accordion_id} control_accordion={control_accordion} block_explorer_link={block_explorer_link} />
             );
         });
     }

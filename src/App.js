@@ -8,13 +8,14 @@ import RecordList from "./Components/recordList";
 import Edit from "./Components/edit";
 import Create from "./Components/create";
 import { useEffect, useState } from 'react';
+import { keccak256 } from 'ethers/lib/utils';
 
 const erc20_abi = require('./utils/erc20_abi.json');
 const digitalcard_abi = require('./utils/Digitalcard_abi.json');
 
 function App() {
 
-  const contractAddress = "0xD3F4991523B383F0a7Dbcd19191C25257C52C25f";
+  const contractAddress = "0x08d10138DEf87cbaB4930B91B5422dF3166ddA82";
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");
@@ -140,30 +141,40 @@ function App() {
   }
 
   const getRequestEvents = async () => {
+    
     const { ethereum } = window;
-
-    // const filter = {
-    //   address: contractAddress,
-    //   topics: [
-    //     utils.id("borrowRequested(address, address, uint32)")
-    //   ] 
-    // }
-
+    const provider = new ethers.providers.Web3Provider(ethereum);
     try {
       if (ethereum) {
         const Uni3contract = await connectToContract();
-        // const allBorrowRequests = await Uni3contract.borrowRequested({lender: connectedAddress}, {fromBlock: 0, toBlock: 'latest'});
-        // allBorrowRequests.watch(function(err, result) {
-        //   if (err) {
-        //     console.log(err)
-        //     return;
-        //   }
-        //   // append details of result.args to UI
-        //   console.log(result.args);
-        // });
-        const borrowevent = await Uni3contract.filters.borrowRequested(connectedAddress);
 
-        console.log(borrowevent);
+        let filterFrom = await Uni3contract.filters.borrowRequested(connectedAddress, null);
+        console.log(filterFrom);
+        filterFrom.fromBlock = 0;
+        let logs = await provider.getLogs(filterFrom); // this one works
+        console.log(logs);
+
+
+        // const borrowevent = await Uni3contract.filters.borrowRequested();
+        // const events = await Uni3contract.queryFilter(borrowevent); // this can be used to get transaction history
+
+        // console.log(events);
+
+        // let eventType = Uni3contract.interface.events.borrowRequested;
+        // console.log(eventType);
+        // eventType.topics[1] = keccak256(connectedAddress);
+        // const plogs = await provider.getLogs({
+        //   fromBlock: 0,
+        //   toBlock: 'latest',
+        //   address: contractAddress,
+        //   topics: eventType.topics
+        // });
+        // console.log(plogs);
+
+
+        // console.log(borrowevent.address);
+        // console.log(borrowevent.data);
+        // console.log(borrowevent.topics);
       }
     } catch (error) {
       console.log("Some error happened ", error);
