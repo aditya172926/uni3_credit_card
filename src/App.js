@@ -15,7 +15,7 @@ const digitalcard_abi = require('./utils/Digitalcard_abi.json');
 
 function App() {
 
-  const contractAddress = "0x08d10138DEf87cbaB4930B91B5422dF3166ddA82";
+  const contractAddress = "0xDa3413c34d23873cF1Bd9ECa6e6264c434bB28bF";
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");
@@ -191,7 +191,7 @@ function App() {
           {walletConnected ? (
             <>
                 <Routes>
-                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork = {currentNetwork} />} />
+                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork = {currentNetwork}  contractAddress = {contractAddress}/>} />
                 </Routes>
             </>
           ) : (<></>)}
