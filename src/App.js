@@ -185,23 +185,16 @@ function App() {
     <>
       <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances={tokenBalances} currentNetwork={currentNetwork} />
 
-      <div className='container-fluid m-0' style={{ backgroundColor: "#3B0847", color: "white" }}>
+      <div className='container-fluid m-0' style={{ color: "white" }}>
         <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
         <button className='btn btn-primary' onClick={() => getRequestEvents()}>Request Events</button>
-        <div className='row'>
           {walletConnected ? (
             <>
-              <div className='col-3'>
                 <Routes>
-                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} />} />
+                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork = {currentNetwork} />} />
                 </Routes>
-              </div>
-              <div className='col-9'>
-                Lending protocol section
-              </div>
             </>
           ) : (<></>)}
-        </div>
       </div>
       <Routes>
         <Route path="/edit/:id" element={<Edit />} />
