@@ -10,8 +10,11 @@ import Create from "./Components/create";
 import { useEffect, useState } from 'react';
 
 const erc20_abi = require('./utils/erc20_abi.json');
+const digitalcard_abi = require('./utils/Digitalcard_abi.json');
 
 function App() {
+
+  const contractAddress = "0xD3F4991523B383F0a7Dbcd19191C25257C52C25f";
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");
@@ -26,7 +29,6 @@ function App() {
     networkName: "",
     chainId: ""
   });
-
 
   const connectWallet = async () => {
     try {
@@ -125,12 +127,56 @@ function App() {
     checkIfWalletisConnected();
   }, [connectedAddress]);
 
+  const connectToContract = async () => {
+    const { ethereum } = window;
+    if (!ethereum) {
+      alert("Get MetaMask!");
+      return;
+    }
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, digitalcard_abi, provider);
+    return contract;
+  }
+
+  const getRequestEvents = async () => {
+    const { ethereum } = window;
+
+    // const filter = {
+    //   address: contractAddress,
+    //   topics: [
+    //     utils.id("borrowRequested(address, address, uint32)")
+    //   ] 
+    // }
+
+    try {
+      if (ethereum) {
+        const Uni3contract = await connectToContract();
+        // const allBorrowRequests = await Uni3contract.borrowRequested({lender: connectedAddress}, {fromBlock: 0, toBlock: 'latest'});
+        // allBorrowRequests.watch(function(err, result) {
+        //   if (err) {
+        //     console.log(err)
+        //     return;
+        //   }
+        //   // append details of result.args to UI
+        //   console.log(result.args);
+        // });
+        const borrowevent = await Uni3contract.filters.borrowRequested(connectedAddress);
+
+        console.log(borrowevent);
+      }
+    } catch (error) {
+      console.log("Some error happened ", error);
+    }
+  }
+
   return (
     <>
       <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances={tokenBalances} currentNetwork={currentNetwork} />
 
-      <div className='container-fluid m-0' style={{ backgroundColor: "#3B0847", color:"white" }}>
+      <div className='container-fluid m-0' style={{ backgroundColor: "#3B0847", color: "white" }}>
         <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
+        <button className='btn btn-primary' onClick={() => getRequestEvents()}>Request Events</button>
         <div className='row'>
           {walletConnected ? (
             <>
