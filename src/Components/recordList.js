@@ -210,18 +210,24 @@ export default function RecordList(props) {
         console.log(borrowEvents);
     }
 
+    useEffect(() => {
+        getRequestEvents();
+    },[props.address, props.currentNetwork]);
+
     function BorrowEventsComponent() {
         return (
             borrowEvents.map((result, index) => {
                 let blockexplorer_link = `https://goerli.etherscan.io/tx/${result.transactionHash}`;
+                let from = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.topics[1]));
+                let to = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.topics[2]));
                 return (
                     // <p key={index}>{result.data}</p>
                     <div className="alert alert-primary" role="alert" key={index}>
-                        From - ...{result.topics[1].substring(58)} | To - ...{result.topics[2].substring(58)} | Amount - {parseInt(result.data, 16)} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
+                        From - {from.substring(0, 8)}...{from.substring(38)} | To - {to.substring(0, 8)}...{to.substring(38)} | Amount - {parseInt(result.data, 16)} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
                     </div>
-                )
+                );
             })
-        )
+        );
     }
 
     function LendEventsComponent() {
@@ -231,10 +237,6 @@ export default function RecordList(props) {
                 let to = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.data.substring(0, 66)));
                 let from = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.topics[1]));
                 let amount = parseInt(result.data.substring(66, 130), 16);
-
-                console.log(to);
-                console.log(from);
-                console.log(parseInt(amount, 16));
                 return (
                     // <p key={index}>{result.data}</p>
                     <div className="alert alert-primary" role="alert" key={index}>
@@ -398,7 +400,8 @@ export default function RecordList(props) {
         return (<div className="alert alert-primary mt-5" role="alert">
             {repayBorrow.gotLoan ? (
                 <>
-                    From - {repayBorrow.lender.substring(0, 8)}...{repayBorrow.lender.substring(38)} | Amount {(repayBorrow.amount * (10 ** (-repayBorrow.decimal_places)))}
+                    From - {repayBorrow.lender.substring(0, 8)}...{repayBorrow.lender.substring(38)} | Amount {(repayBorrow.amount * (10 ** (-repayBorrow.decimal_places)))} <br />
+                    Installments Remaining - {repayBorrow.repayments}
                 </>
 
             ) : (
@@ -420,8 +423,6 @@ export default function RecordList(props) {
                 </div>
             </div>
             <div className="col-6 text-center">
-                Lending protocol section
-                <button className='btn btn-primary' onClick={() => getRequestEvents()}>Request Events</button>
 
                 {/* <button className='btn btn-primary' onClick={() => testing()}>Testing</button> */}
                 <div className="row justify-content-center mt-5">
@@ -528,7 +529,7 @@ export default function RecordList(props) {
                     </div>
                 </div>
                 <div className="row justify-content-center my-5">
-                    <h4>Histories</h4>
+                    <h4>Transactions</h4>
                     <div className="btn-group my-3" role="group" aria-label="Basic radio toggle button group">
                         <input type="radio" className="btn-check" name="btnradio" id="btnradio3" onClick={() => setHistoryType("Lending")} autoComplete="off" />
                         <label className="btn btn-outline-primary" htmlFor="btnradio3">Lending</label>
