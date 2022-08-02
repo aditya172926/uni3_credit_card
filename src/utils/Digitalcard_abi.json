@@ -58,6 +58,11 @@
 				"internalType": "string",
 				"name": "tokentype",
 				"type": "string"
+			},
+			{
+				"internalType": "uint16",
+				"name": "amount",
+				"type": "uint16"
 			}
 		],
 		"name": "lendTokens",

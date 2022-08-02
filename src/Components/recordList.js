@@ -173,11 +173,15 @@ export default function RecordList(props) {
     }
 
     async function approve(_price) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const { ethereum } = window;
+        const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
-        const contract = new ethers.Contract(USDcAddress, erc20_abi, provider);
+        const contract = new ethers.Contract(USDcAddress, erc20_abi, signer);
         console.log(contract);
-        const result = await contract.methods.approve(props.contractAddress, _price);
+        let amount = _price * (10**6);
+        console.log(amount);
+        const result = await contract.approve(props.contractAddress, amount.toString());
+        result.wait();
         console.log(result);
 
         return result;
@@ -190,7 +194,7 @@ export default function RecordList(props) {
             if (ethereum) {
                 const uni3contract = await connectToContract();
                 await approve(amount);
-                const lendTxn = await uni3contract.lendTokens(borrower, tokenType);
+                const lendTxn = await uni3contract.lendTokens(borrower, tokenType, amount);
                 console.log("Mining...", lendTxn.hash);
                 await lendTxn.wait();
                 console.log("Mined -- ", lendTxn.hash);
@@ -270,7 +274,7 @@ export default function RecordList(props) {
                         <div className='card-header'>Request To Borrow</div>
                         <div className="card-body">
 
-                            <form onSubmit={onSubmitRequest}>
+                            <form>
                                 <div className="mb-3">
                                     <label for="inputAddress" class="form-label">From</label>
                                     <input type="text" class="form-control" id="inputAddress"
@@ -295,7 +299,7 @@ export default function RecordList(props) {
                                     </span>
                                 </div>
                                 <div class="d-grid gap-2 col-6 mx-auto">
-                                    <button className="btn btn-primary" type="submit">Send Request</button>
+                                    <button className="btn btn-primary" type="button" onClick={() => onSubmitRequest()}>Send Request</button>
                                 </div>
                             </form>
                         </div>
