@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { ethers } from 'ethers';
+import {Modal} from 'react-bootstrap';
 
 import Navbar from "./Components/navbar";
 import RecordList from "./Components/recordList";
@@ -15,7 +16,7 @@ const digitalcard_abi = require('./utils/Digitalcard_abi.json');
 
 function App() {
 
-  const contractAddress = "0x5846FbE3627B4Fc6d6943acb8E5DE04ad2Da1265";
+  const contractAddress = "0x6852A4cFf71f50Bf1AeE440F70DF318e3113A4b3";
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");
@@ -145,15 +146,35 @@ function App() {
     <>
       <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances={tokenBalances} currentNetwork={currentNetwork} />
 
-      <div className='container-fluid m-0' style={{ color: "white" }}>
-        <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
-          {walletConnected ? (
-            <>
-                <Routes>
-                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork = {currentNetwork}  contractAddress = {contractAddress}/>} />
-                </Routes>
-            </>
-          ) : (<></>)}
+      <div className='container-fluid m-0'>
+
+        {walletConnected ? (
+          <>
+            <Routes>
+              <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork={currentNetwork} contractAddress={contractAddress} />} />
+            </Routes>
+          </>
+        ) : (<>
+          <Modal show={!walletConnected} centered className="connectWalletModal">
+            <Modal.Body>
+              <div className="container">
+                <br></br>
+                <div className="row">
+                  <div className="col">
+                    <h5>Borrow from your peers
+                    </h5>
+                  </div>
+                  <div className="col text-center">
+                    <p>Connect your Metamask wallet</p>
+                    <button id="connectWallet" className="btn btn-primary" onClick={() => connectWallet()}>
+                      Connect
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Modal.Body>
+          </Modal>
+        </>)}
       </div>
       <Routes>
         <Route path="/edit/:id" element={<Edit />} />

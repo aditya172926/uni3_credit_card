@@ -7,10 +7,10 @@ const erc20_abi = require('../utils/erc20_abi.json');
 
 const Record = (props) => (
     <>
-        <div className="accordion-item" style={{ backgroundColor: "#3B0847" }}>
+        <div className="accordion-item" style={{ backgroundColor: "transparent" }}>
             <h2 className="accordion-header" id={props.record.user_address}>
                 <div className="d-flex">
-                    <button className="accordion-button collapsed" style={{ backgroundColor: "#3B0847", color: "white" }}
+                    <button className="accordion-button collapsed" style={{ backgroundColor: "transparent", color: "#3B0847" }}
                         type="button" data-bs-toggle="collapse" data-bs-target={props.accordion_id}
                         aria-expanded="false" aria-controls={props.control_accordion}>
                         {props.record.name}
@@ -25,28 +25,7 @@ const Record = (props) => (
                 </div>
             </div>
         </div>
-        {/* <li className="list-group-item">{props.record.name}</li> */}
     </>
-
-    // <tr>
-    //     <td>{props.record.name}</td>
-    //     <td>{props.record.user_address}</td>
-    //     <td>{props.record.blockexplorer_link}</td>
-    //     {/* {props.record.contacts.map((name) => {
-    //         return (<td>{name}</td>);
-
-    //     })} */}
-    //     {/* <td>
-    //         <Link className="btn btn-link" to={`/edit/${props.record._id}`}>Edit</Link> |
-    //         <button className="btn btn-link"
-    //             onClick={() => {
-    //                 props.deleteRecord(props.record._id);
-    //             }}
-    //         >
-    //             Delete
-    //         </button>
-    //     </td> */}
-    // </tr>
 );
 
 export default function RecordList(props) {
@@ -56,17 +35,15 @@ export default function RecordList(props) {
     const [potentialBorrowers, setPotentialBorrowers] = useState([]);
     const [showRepaymentCard, setShowRepaymentCard] = useState(false);
     const [historyType, setHistoryType] = useState("Lending");
+    const [repayBorrow, setRepayBorrow] = useState({});
 
     // contract events
     const [borrowEvents, setBorrowEvents] = useState([]);
     const [lendingEvents, setLendingEvents] = useState([]);
     const [repaymentEvents, setRepaymentEvents] = useState([]);
 
-
-
     const USDcAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";
 
-    const address = "bbbbbbbbbbb";
     const addressInd = props.addressInd.toString();
     console.log(window.addressInd);
     console.log(addressInd);
@@ -120,15 +97,20 @@ export default function RecordList(props) {
 
     const onSubmitRequest = async () => {
         const { ethereum } = window;
+        let amount = (requestAmount.current.value).toString();
+        let decimal_places;
+        if (amount.includes('.')) {
+            decimal_places = amount.split('.')[1].length;
+        }
         try {
             if (ethereum) {
                 const uni3contract = await connectToContract();
 
                 const reqTxn = await uni3contract.initiateBorrowRequest(
                     (reqAddress.current.value).toString(),
-                    (requestAmount.current.value).toString(),
+                    (requestAmount.current.value * (10 ** decimal_places)).toString(),
                     requestToken,
-                    "1"
+                    decimal_places.toString()
                 );
                 console.log("Mining...", reqTxn.hash);
                 await reqTxn.wait();
@@ -147,8 +129,16 @@ export default function RecordList(props) {
             if (ethereum) {
                 const uni3contract = await connectToContract();
                 const postedReq = await uni3contract.getBorrowerRequests(address);
-                console.log(postedReq[0]);
-                return ({ borrower: address, amount: postedReq[1], tokenType: postedReq[2] });
+                console.log(postedReq);
+                return ({
+                    borrower: address,
+                    lender: postedReq[0],
+                    decimal_places: postedReq[1],
+                    amount: postedReq[2],
+                    tokenType: postedReq[3],
+                    repayments: postedReq[4],
+                    gotLoan: postedReq[5]
+                });
             }
         } catch (error) {
             console.log(error);
@@ -213,40 +203,12 @@ export default function RecordList(props) {
                 let lendLogs = await provider.getLogs(lend);
                 console.log(lendLogs);
                 setLendingEvents([...lendLogs,]);
-                
-
-                // const borrowevent = await Uni3contract.filters.borrowRequested();
-                // const events = await Uni3contract.queryFilter(borrowevent); // this can be used to get transaction history
-
-                // console.log(events);
-
-                // let eventType = Uni3contract.interface.events.borrowRequested;
-                // console.log(eventType);
-                // eventType.topics[1] = keccak256(connectedAddress);
-                // const plogs = await provider.getLogs({
-                //   fromBlock: 0,
-                //   toBlock: 'latest',
-                //   address: contractAddress,
-                //   topics: eventType.topics
-                // });
-                // console.log(plogs);
-
-
-                // console.log(borrowevent.address);
-                // console.log(borrowevent.data);
-                // console.log(borrowevent.topics);
             }
         } catch (error) {
             console.log("Some error happened ", error);
         }
         console.log(borrowEvents);
     }
-
-    // const testing = async () => {
-    //     borrowEvents.map((result) => {
-    //         console.log(result.data);
-    //     })
-    // }
 
     function BorrowEventsComponent() {
         return (
@@ -264,11 +226,11 @@ export default function RecordList(props) {
 
     function LendEventsComponent() {
         return (
-            lendingEvents.map((result, index) => {             
+            lendingEvents.map((result, index) => {
                 let blockexplorer_link = `https://goerli.etherscan.io/tx/${result.transactionHash}`;
-                let to = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.data.substring(0,66)));
+                let to = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.data.substring(0, 66)));
                 let from = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.topics[1]));
-                let amount = parseInt(result.data.substring(66,130), 16);
+                let amount = parseInt(result.data.substring(66, 130), 16);
 
                 console.log(to);
                 console.log(from);
@@ -276,7 +238,7 @@ export default function RecordList(props) {
                 return (
                     // <p key={index}>{result.data}</p>
                     <div className="alert alert-primary" role="alert" key={index}>
-                        To - {to.substring(0,8)}...{to.substring(38)} | From - {from.substring(0,8)}...{from.substring(38)} | Amount - {amount} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
+                        To - {to.substring(0, 8)}...{to.substring(38)} | From - {from.substring(0, 8)}...{from.substring(38)} | Amount - {amount} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
                     </div>
                 )
             })
@@ -301,7 +263,10 @@ export default function RecordList(props) {
         const signer = provider.getSigner();
         const contract = new ethers.Contract(USDcAddress, erc20_abi, signer);
         console.log(contract);
-        let amount = _price * (10 ** 6);
+        console.log(_price);
+        let amount = (_price * (10 ** 6));
+        console.log(amount);
+        amount = Math.ceil(amount);
         console.log(amount);
         const result = await contract.approve(props.contractAddress, amount.toString());
         await result.wait();
@@ -310,14 +275,15 @@ export default function RecordList(props) {
         return result;
     }
 
-    const grantBorrowRequest = async (amount, index, tokenType, borrower) => {
+    const grantBorrowRequest = async (amount, index, tokenType, borrower, decimal_places) => {
         console.log(amount, index, tokenType, borrower);
         const { ethereum } = window;
         try {
             if (ethereum) {
                 const uni3contract = await connectToContract();
-                await approve(amount);
-                const lendTxn = await uni3contract.lendTokens(borrower, tokenType, amount, index);
+                let grant_amount = amount * (10 ** (6 - decimal_places));
+                await approve(grant_amount);
+                const lendTxn = await uni3contract.lendTokens(borrower, tokenType, grant_amount, index);
                 console.log("Mining...", lendTxn.hash);
                 await lendTxn.wait();
                 console.log("Mined -- ", lendTxn.hash);
@@ -327,14 +293,31 @@ export default function RecordList(props) {
         }
     }
 
-    const submitRepayRequest = async (amount, to) => {
+    const submitRepayRequest = async (to, amount, installment, decimal_places) => {
         console.log("Repay request made");
+        let repay_amount = requestAmount.current.value * (10 ** (6 - decimal_places));
+        // let repay_amount = requestAmount.current.value;
+        let interest_amt;
+        let treasury_amt;
+        if (installment == 3) {
+            interest_amt = repay_amount * 0.01;
+            treasury_amt = repay_amount * 0.005;
+        } else if (installment == 2) {
+            interest_amt = repay_amount * 0.02;
+            treasury_amt = repay_amount * 0.01;
+        } else if (installment == 1) {
+            interest_amt = repay_amount * 0.03;
+            treasury_amt = repay_amount * 0.015;
+        }
+        console.log(interest_amt, treasury_amt);
         const { ethereum } = window;
         try {
             if (ethereum) {
                 const uni3contract = await connectToContract();
-                await approve(amount);
-                const repayTxn = await uni3contract.repay(to, amount);
+                interest_amt = Math.ceil(interest_amt);
+                treasury_amt = Math.ceil(treasury_amt);
+                await approve(repay_amount + interest_amt + treasury_amt);
+                const repayTxn = await uni3contract.repay(to, repay_amount, interest_amt, treasury_amt);
                 console.log("Mining...", repayTxn.hash);
                 await repayTxn.wait();
                 console.log("Mined -- ", repayTxn.hash);
@@ -360,7 +343,13 @@ export default function RecordList(props) {
                                     {request.borrower.substring(0, 8)}...{request.borrower.substring(38)}
                                 </button>
                                 <button className="btn btn-primary py-0" style={{ height: "42px" }}
-                                    type="button" onClick={() => grantBorrowRequest(request.amount, index, request.tokenType, request.borrower)}>
+                                    type="button" onClick={() => grantBorrowRequest(
+                                        request.amount,
+                                        index,
+                                        request.tokenType,
+                                        request.borrower,
+                                        request.decimal_places
+                                    )}>
                                     Grant
                                 </button>
                             </div>
@@ -398,11 +387,35 @@ export default function RecordList(props) {
         });
     }
 
+    const switchToRepay = async () => {
+        let repayObj = await getBorrowRequests(props.address);
+        setRepayBorrow({ ...repayObj });
+        setShowRepaymentCard(true);
+    }
+
+    function RepayComponent() {
+        console.log(repayBorrow);
+        return (<div className="alert alert-primary mt-5" role="alert">
+            {repayBorrow.gotLoan ? (
+                <>
+                    From - {repayBorrow.lender.substring(0, 8)}...{repayBorrow.lender.substring(38)} | Amount {(repayBorrow.amount * (10 ** (-repayBorrow.decimal_places)))}
+                </>
+
+            ) : (
+                <>
+                    No loans granted
+                </>
+            )}
+
+        </div>
+        )
+    }
+
     return (
         <div className="row">
             <div className="col-3 mt-5">
                 <h3>Contacts</h3>
-                <div className="accordion accordion-flush" style={{ backgroundColor: "#3B0847" }} id="contacts_accordion">
+                <div className="accordion accordion-flush" style={{ backgroundColor: "transparent" }} id="contacts_accordion">
                     {recordList()}
                 </div>
             </div>
@@ -415,10 +428,15 @@ export default function RecordList(props) {
                     <div className="card text-bg-dark text-center" style={{ width: "80%" }}>
                         <div className="btn-group my-3" role="group" aria-label="Basic radio toggle button group">
                             <input type="radio" className="btn-check" name="btnradio" onClick={() => setShowRepaymentCard(false)} id="btnradio1" autoComplete="off" />
-                            <label className="btn btn-outline-primary" htmlFor="btnradio1">Borrow</label>
+                            <label className="btn btn-outline-primary" htmlFor="btnradio1">
+                                Borrow
+                            </label>
 
-                            <input type="radio" className="btn-check" name="btnradio" onClick={() => setShowRepaymentCard(true)} id="btnradio2" autoComplete="off" />
-                            <label className="btn btn-outline-primary" htmlFor="btnradio2">Repay</label>
+                            <input type="radio" className="btn-check" name="btnradio"
+                                onClick={() => switchToRepay()} id="btnradio2" autoComplete="off" />
+                            <label className="btn btn-outline-primary" htmlFor="btnradio2">
+                                Repay
+                            </label>
                         </div>
                         {showRepaymentCard ? (
                             <>
@@ -427,28 +445,47 @@ export default function RecordList(props) {
                                         <div className="mt-4 mb-2">
                                             <label htmlFor="inputAddress" className="form-label"><h4>To</h4></label>
                                             <input type="text" className="form-control" id="inputAddress"
-                                                aria-describedby="addressHelp" value={requestAddressVal}
+                                                aria-describedby="addressHelp"
                                                 placeholder="0x0000000000000000000000000000000000000000" required ref={reqAddress} />
                                         </div>
                                         <div className="mt-4 mb-2">
                                             <label htmlFor="inputAmount" className="form-label"><h4>Amount</h4></label>
                                         </div>
                                         <div className="input-group mb-3">
-                                            <input ref={requestAmount} type="number" className="form-control" id="inputAmount" aria-describedby="amountHelp" placeholder="0.0" required />
+                                            <input ref={requestAmount} type="number"
+                                                className="form-control" id="inputAmount"
+                                                aria-describedby="amountHelp" placeholder="0.0" required />
                                             <span className="input-group-text" id="basic-addon2">
                                                 <div className="dropdown">
-                                                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <button className="btn btn-secondary dropdown-toggle"
+                                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                         <b>{requestToken}</b>
                                                     </button>
                                                     <ul className="dropdown-menu dropdown-menu-dark">
-                                                        <li><a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("USDc")}>USDc</a></li>
-                                                        <li><a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("ETH")}>ETH</a></li>
+                                                        <li>
+                                                            <a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("USDc")}>
+                                                                USDc
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("ETH")}>
+                                                                ETH
+                                                            </a>
+                                                        </li>
                                                     </ul>
                                                 </div>
                                             </span>
                                         </div>
                                         <div className="d-grid gap-2 col-6 mx-auto mt-5 mb-3">
-                                            <button className="btn btn-primary" type="button" onClick={() => submitRepayRequest()}>Repay</button>
+                                            <button className="btn btn-primary" type="button"
+                                                onClick={() => submitRepayRequest(
+                                                    repayBorrow.lender,
+                                                    repayBorrow.amount,
+                                                    repayBorrow.repayments,
+                                                    repayBorrow.decimal_places
+                                                )}>
+                                                Repay
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -499,12 +536,22 @@ export default function RecordList(props) {
                         <input type="radio" className="btn-check" name="btnradio" id="btnradio4" onClick={() => setHistoryType("Borrowing")} autoComplete="off" />
                         <label className="btn btn-outline-primary" htmlFor="btnradio4">Borrowing</label>
                     </div>
-                    <GetHistoryEvents />                    
+                    <GetHistoryEvents />
                 </div>
             </div>
             <div className="col-3 text-center mt-5">
                 Requests section
-                {requestList()}
+                {showRepaymentCard ? (
+                    <>
+                        <RepayComponent />
+                    </>
+                ) : (
+                    <>
+                        {requestList()}
+                    </>
+
+                )}
+
             </div>
         </div >
     );
