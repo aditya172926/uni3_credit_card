@@ -209,16 +209,10 @@ export default function RecordList(props) {
 
                 let borrowLogs = await provider.getLogs(borrow); // this one works
                 console.log(...borrowLogs);
-                setBorrowEvents(prevState => [
-                    ...prevState,
-                    ...borrowLogs,
-                ]);
+                setBorrowEvents([...borrowLogs,]);
                 let lendLogs = await provider.getLogs(lend);
                 console.log(lendLogs);
-                setLendingEvents(prevState => [
-                    ...prevState,
-                    ...lendLogs,
-                ]);
+                setLendingEvents([...lendLogs,]);
                 
 
                 // const borrowevent = await Uni3contract.filters.borrowRequested();
@@ -257,8 +251,12 @@ export default function RecordList(props) {
     function BorrowEventsComponent() {
         return (
             borrowEvents.map((result, index) => {
+                let blockexplorer_link = `https://goerli.etherscan.io/tx/${result.transactionHash}`;
                 return (
-                    <p key={index}>{result.data}</p>
+                    // <p key={index}>{result.data}</p>
+                    <div className="alert alert-primary" role="alert" key={index}>
+                        From - ...{result.topics[1].substring(58)} | To - ...{result.topics[2].substring(58)} | Amount - {parseInt(result.data, 16)} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
+                    </div>
                 )
             })
         )
@@ -266,9 +264,20 @@ export default function RecordList(props) {
 
     function LendEventsComponent() {
         return (
-            lendingEvents.map((result, index) => {
+            lendingEvents.map((result, index) => {             
+                let blockexplorer_link = `https://goerli.etherscan.io/tx/${result.transactionHash}`;
+                let to = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.data.substring(0,66)));
+                let from = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.topics[1]));
+                let amount = parseInt(result.data.substring(66,130), 16);
+
+                console.log(to);
+                console.log(from);
+                console.log(parseInt(amount, 16));
                 return (
-                    <p key={index}>{result.data}</p>
+                    // <p key={index}>{result.data}</p>
+                    <div className="alert alert-primary" role="alert" key={index}>
+                        To - {to.substring(0,8)}...{to.substring(38)} | From - {from.substring(0,8)}...{from.substring(38)} | Amount - {amount} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
+                    </div>
                 )
             })
         )
@@ -489,18 +498,8 @@ export default function RecordList(props) {
 
                         <input type="radio" className="btn-check" name="btnradio" id="btnradio4" onClick={() => setHistoryType("Borrowing")} autoComplete="off" />
                         <label className="btn btn-outline-primary" htmlFor="btnradio4">Borrowing</label>
-
-                        <input type="radio" className="btn-check" name="btnradio" id="btnradio5" onClick={() => setHistoryType("Repayment")} autoComplete="off" />
-                        <label className="btn btn-outline-primary" htmlFor="btnradio5">Repayment</label>
                     </div>
-                    fffff
-                    <GetHistoryEvents />
-                    {/* {borrowEvents[0]}
-                    Borrowing
-                    <BorrowEventsComponent />
-
-                    Lending
-                    <LendEventsComponent /> */}
+                    <GetHistoryEvents />                    
                 </div>
             </div>
             <div className="col-3 text-center mt-5">
