@@ -40,6 +40,11 @@
 				"internalType": "string",
 				"name": "tokentype",
 				"type": "string"
+			},
+			{
+				"internalType": "uint8",
+				"name": "_decimals",
+				"type": "uint8"
 			}
 		],
 		"name": "initiateBorrowRequest",
@@ -63,6 +68,11 @@
 				"internalType": "uint16",
 				"name": "amount",
 				"type": "uint16"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_index",
+				"type": "uint256"
 			}
 		],
 		"name": "lendTokens",
@@ -124,6 +134,11 @@
 		],
 		"name": "getBorrowerRequests",
 		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			},
 			{
 				"internalType": "uint16",
 				"name": "",

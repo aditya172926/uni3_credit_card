@@ -118,7 +118,8 @@ export default function RecordList(props) {
                 const reqTxn = await uni3contract.initiateBorrowRequest(
                     (reqAddress.current.value).toString(),
                     (requestAmount.current.value).toString(),
-                    requestToken
+                    requestToken,
+                    "1"
                 );
                 console.log("Mining...", reqTxn.hash);
                 await reqTxn.wait();
@@ -129,10 +130,6 @@ export default function RecordList(props) {
             console.log(error);
         }
         await getBorrowRequests();
-        console.log("The input values are - ");
-        console.log(reqAddress.current.value);
-        console.log(requestAmount.current.value);
-        console.log(requestToken);
     }
 
     const getBorrowRequests = async (address) => {
@@ -142,7 +139,7 @@ export default function RecordList(props) {
                 const uni3contract = await connectToContract();
                 const postedReq = await uni3contract.getBorrowerRequests(address);
                 console.log(postedReq[0]);
-                return ({ borrower: address, amount: postedReq[0], tokenType: postedReq[1] });
+                return ({ borrower: address, amount: postedReq[1], tokenType: postedReq[2] });
             }
         } catch (error) {
             console.log(error);
@@ -181,7 +178,7 @@ export default function RecordList(props) {
         let amount = _price * (10**6);
         console.log(amount);
         const result = await contract.approve(props.contractAddress, amount.toString());
-        result.wait();
+        await result.wait();
         console.log(result);
 
         return result;
@@ -194,7 +191,7 @@ export default function RecordList(props) {
             if (ethereum) {
                 const uni3contract = await connectToContract();
                 await approve(amount);
-                const lendTxn = await uni3contract.lendTokens(borrower, tokenType, amount);
+                const lendTxn = await uni3contract.lendTokens(borrower, tokenType, amount, index);
                 console.log("Mining...", lendTxn.hash);
                 await lendTxn.wait();
                 console.log("Mined -- ", lendTxn.hash);
