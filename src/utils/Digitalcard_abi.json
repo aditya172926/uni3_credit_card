@@ -40,6 +40,11 @@
 				"internalType": "string",
 				"name": "tokentype",
 				"type": "string"
+			},
+			{
+				"internalType": "uint8",
+				"name": "_decimals",
+				"type": "uint8"
 			}
 		],
 		"name": "initiateBorrowRequest",
@@ -58,6 +63,16 @@
 				"internalType": "string",
 				"name": "tokentype",
 				"type": "string"
+			},
+			{
+				"internalType": "uint16",
+				"name": "amount",
+				"type": "uint16"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_index",
+				"type": "uint256"
 			}
 		],
 		"name": "lendTokens",
@@ -100,11 +115,26 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_borrower",
+				"name": "to",
 				"type": "address"
+			},
+			{
+				"internalType": "uint16",
+				"name": "_amount",
+				"type": "uint16"
+			},
+			{
+				"internalType": "uint16",
+				"name": "interest_payment",
+				"type": "uint16"
+			},
+			{
+				"internalType": "uint16",
+				"name": "treasury_amount",
+				"type": "uint16"
 			}
 		],
-		"name": "sendETHToken",
+		"name": "repay",
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
@@ -117,8 +147,68 @@
 				"type": "address"
 			}
 		],
+		"name": "sendETHToken",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint32",
+				"name": "borrowed_amount",
+				"type": "uint32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint32",
+				"name": "amount_paid",
+				"type": "uint32"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint8",
+				"name": "installments",
+				"type": "uint8"
+			}
+		],
+		"name": "tokensRepay",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_borrower",
+				"type": "address"
+			}
+		],
 		"name": "getBorrowerRequests",
 		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			},
 			{
 				"internalType": "uint16",
 				"name": "",
@@ -128,6 +218,16 @@
 				"internalType": "string",
 				"name": "",
 				"type": "string"
+			},
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			},
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",

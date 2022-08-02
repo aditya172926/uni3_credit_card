@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { ethers } from 'ethers';
+import {Modal} from 'react-bootstrap';
 
 import Navbar from "./Components/navbar";
 import RecordList from "./Components/recordList";
@@ -15,7 +16,7 @@ const digitalcard_abi = require('./utils/Digitalcard_abi.json');
 
 function App() {
 
-  const contractAddress = "0xDa3413c34d23873cF1Bd9ECa6e6264c434bB28bF";
+  const contractAddress = "0x6852A4cFf71f50Bf1AeE440F70DF318e3113A4b3";
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");
@@ -140,61 +141,40 @@ function App() {
     return contract;
   }
 
-  const getRequestEvents = async () => {
-    
-    const { ethereum } = window;
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    try {
-      if (ethereum) {
-        const Uni3contract = await connectToContract();
-
-        let filterFrom = await Uni3contract.filters.borrowRequested(connectedAddress, null);
-        console.log(filterFrom);
-        filterFrom.fromBlock = 0;
-        let logs = await provider.getLogs(filterFrom); // this one works
-        console.log(logs);
-
-
-        // const borrowevent = await Uni3contract.filters.borrowRequested();
-        // const events = await Uni3contract.queryFilter(borrowevent); // this can be used to get transaction history
-
-        // console.log(events);
-
-        // let eventType = Uni3contract.interface.events.borrowRequested;
-        // console.log(eventType);
-        // eventType.topics[1] = keccak256(connectedAddress);
-        // const plogs = await provider.getLogs({
-        //   fromBlock: 0,
-        //   toBlock: 'latest',
-        //   address: contractAddress,
-        //   topics: eventType.topics
-        // });
-        // console.log(plogs);
-
-
-        // console.log(borrowevent.address);
-        // console.log(borrowevent.data);
-        // console.log(borrowevent.topics);
-      }
-    } catch (error) {
-      console.log("Some error happened ", error);
-    }
-  }
 
   return (
     <>
       <Navbar walletConnected={walletConnected} connectedAddress={connectedAddress} userBalance={userBalance} balances={tokenBalances} currentNetwork={currentNetwork} />
 
-      <div className='container-fluid m-0' style={{ color: "white" }}>
-        <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
-        <button className='btn btn-primary' onClick={() => getRequestEvents()}>Request Events</button>
-          {walletConnected ? (
-            <>
-                <Routes>
-                  <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork = {currentNetwork}  contractAddress = {contractAddress}/>} />
-                </Routes>
-            </>
-          ) : (<></>)}
+      <div className='container-fluid m-0'>
+
+        {walletConnected ? (
+          <>
+            <Routes>
+              <Route exact path="/" element={<RecordList address={connectedAddress} addressInd={addressIndex} currentNetwork={currentNetwork} contractAddress={contractAddress} />} />
+            </Routes>
+          </>
+        ) : (<>
+          <Modal show={!walletConnected} centered className="connectWalletModal">
+            <Modal.Body>
+              <div className="container">
+                <br></br>
+                <div className="row">
+                  <div className="col">
+                    <h5>Borrow from your peers
+                    </h5>
+                  </div>
+                  <div className="col text-center">
+                    <p>Connect your Metamask wallet</p>
+                    <button id="connectWallet" className="btn btn-primary" onClick={() => connectWallet()}>
+                      Connect
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Modal.Body>
+          </Modal>
+        </>)}
       </div>
       <Routes>
         <Route path="/edit/:id" element={<Edit />} />
