@@ -140,46 +140,6 @@ function App() {
     return contract;
   }
 
-  const getRequestEvents = async () => {
-    
-    const { ethereum } = window;
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    try {
-      if (ethereum) {
-        const Uni3contract = await connectToContract();
-
-        let filterFrom = await Uni3contract.filters.borrowRequested(connectedAddress, null);
-        console.log(filterFrom);
-        filterFrom.fromBlock = 0;
-        let logs = await provider.getLogs(filterFrom); // this one works
-        console.log(logs);
-
-
-        // const borrowevent = await Uni3contract.filters.borrowRequested();
-        // const events = await Uni3contract.queryFilter(borrowevent); // this can be used to get transaction history
-
-        // console.log(events);
-
-        // let eventType = Uni3contract.interface.events.borrowRequested;
-        // console.log(eventType);
-        // eventType.topics[1] = keccak256(connectedAddress);
-        // const plogs = await provider.getLogs({
-        //   fromBlock: 0,
-        //   toBlock: 'latest',
-        //   address: contractAddress,
-        //   topics: eventType.topics
-        // });
-        // console.log(plogs);
-
-
-        // console.log(borrowevent.address);
-        // console.log(borrowevent.data);
-        // console.log(borrowevent.topics);
-      }
-    } catch (error) {
-      console.log("Some error happened ", error);
-    }
-  }
 
   return (
     <>
@@ -187,7 +147,6 @@ function App() {
 
       <div className='container-fluid m-0' style={{ color: "white" }}>
         <button className='btn btn-primary' onClick={() => connectWallet()}>Connect Wallet</button>
-        <button className='btn btn-primary' onClick={() => getRequestEvents()}>Request Events</button>
           {walletConnected ? (
             <>
                 <Routes>

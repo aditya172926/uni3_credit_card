@@ -54,6 +54,15 @@ export default function RecordList(props) {
     const [requestToken, setRequestToken] = useState("USDc");
     const [requestAddressVal, setRequestAddressVal] = useState("");
     const [potentialBorrowers, setPotentialBorrowers] = useState([]);
+    const [showRepaymentCard, setShowRepaymentCard] = useState(false);
+    const [historyType, setHistoryType] = useState("Lending");
+
+    // contract events
+    const [borrowEvents, setBorrowEvents] = useState([]);
+    const [lendingEvents, setLendingEvents] = useState([]);
+    const [repaymentEvents, setRepaymentEvents] = useState([]);
+
+
 
     const USDcAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";
 
@@ -129,7 +138,7 @@ export default function RecordList(props) {
         } catch (error) {
             console.log(error);
         }
-        await getBorrowRequests();
+        // await getBorrowRequests();
     }
 
     const getBorrowRequests = async (address) => {
@@ -152,7 +161,7 @@ export default function RecordList(props) {
             if (ethereum) {
                 const uni3contract = await connectToContract();
                 const reqArray = await uni3contract.getBorrowers();
-                console.log(reqArray); // will get the array of users who asked you for money
+                console.log(reqArray); // will get the array of users who asked you htmlFor money
                 // setPotentialBorrowers(reqArray);
                 setPotentialBorrowers([]);
                 for (let i = 0; i < reqArray.length; i++) {
@@ -169,20 +178,128 @@ export default function RecordList(props) {
         }
     }
 
+    useEffect(() => {
+        let uni3contract;
+        const onBorrowRequested = (lender, borrower, amount) => {
+            console.log("New borrow request");
+        }
+        if (window.ethereum) {
+            uni3contract = new ethers.providers.Web3Provider(window.ethereum);
+            uni3contract.on("borrowRequested", onBorrowRequested);
+        }
+    });
+
+    const getRequestEvents = async () => {
+
+        const { ethereum } = window;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        try {
+            if (ethereum) {
+                const Uni3contract = await connectToContract();
+
+                // borrow requests that I have received from others
+                let borrow = await Uni3contract.filters.borrowRequested(props.connectedAddress, null); // gets the logs of borrow requests: The event goes this way (lender, borrower, amount)
+                let lend = await Uni3contract.filters.moneyLent(props.connectedAddress, null);
+
+                console.log(borrow);
+                console.log(lend);
+
+                borrow.fromBlock = 0;
+                lend.fromBlock = 0;
+
+                let borrowLogs = await provider.getLogs(borrow); // this one works
+                console.log(...borrowLogs);
+                setBorrowEvents(prevState => [
+                    ...prevState,
+                    ...borrowLogs,
+                ]);
+                let lendLogs = await provider.getLogs(lend);
+                console.log(lendLogs);
+                setLendingEvents(prevState => [
+                    ...prevState,
+                    ...lendLogs,
+                ]);
+                
+
+                // const borrowevent = await Uni3contract.filters.borrowRequested();
+                // const events = await Uni3contract.queryFilter(borrowevent); // this can be used to get transaction history
+
+                // console.log(events);
+
+                // let eventType = Uni3contract.interface.events.borrowRequested;
+                // console.log(eventType);
+                // eventType.topics[1] = keccak256(connectedAddress);
+                // const plogs = await provider.getLogs({
+                //   fromBlock: 0,
+                //   toBlock: 'latest',
+                //   address: contractAddress,
+                //   topics: eventType.topics
+                // });
+                // console.log(plogs);
+
+
+                // console.log(borrowevent.address);
+                // console.log(borrowevent.data);
+                // console.log(borrowevent.topics);
+            }
+        } catch (error) {
+            console.log("Some error happened ", error);
+        }
+        console.log(borrowEvents);
+    }
+
+    // const testing = async () => {
+    //     borrowEvents.map((result) => {
+    //         console.log(result.data);
+    //     })
+    // }
+
+    function BorrowEventsComponent() {
+        return (
+            borrowEvents.map((result, index) => {
+                return (
+                    <p key={index}>{result.data}</p>
+                )
+            })
+        )
+    }
+
+    function LendEventsComponent() {
+        return (
+            lendingEvents.map((result, index) => {
+                return (
+                    <p key={index}>{result.data}</p>
+                )
+            })
+        )
+    }
+
+    function GetHistoryEvents() {
+        if (historyType == "Lending") {
+            return (<LendEventsComponent />);
+        } else if (historyType == "Borrowing") {
+            return (<BorrowEventsComponent />);
+        }
+    }
+
+    useState(() => {
+        GetHistoryEvents();
+    }, [historyType]);
+
     async function approve(_price) {
         const { ethereum } = window;
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(USDcAddress, erc20_abi, signer);
         console.log(contract);
-        let amount = _price * (10**6);
+        let amount = _price * (10 ** 6);
         console.log(amount);
         const result = await contract.approve(props.contractAddress, amount.toString());
         await result.wait();
         console.log(result);
 
         return result;
-      }
+    }
 
     const grantBorrowRequest = async (amount, index, tokenType, borrower) => {
         console.log(amount, index, tokenType, borrower);
@@ -196,7 +313,24 @@ export default function RecordList(props) {
                 await lendTxn.wait();
                 console.log("Mined -- ", lendTxn.hash);
             }
-        } catch(error) {
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const submitRepayRequest = async (amount, to) => {
+        console.log("Repay request made");
+        const { ethereum } = window;
+        try {
+            if (ethereum) {
+                const uni3contract = await connectToContract();
+                await approve(amount);
+                const repayTxn = await uni3contract.repay(to, amount);
+                console.log("Mining...", repayTxn.hash);
+                await repayTxn.wait();
+                console.log("Mined -- ", repayTxn.hash);
+            }
+        } catch (error) {
             console.log(error);
         }
     }
@@ -255,7 +389,6 @@ export default function RecordList(props) {
         });
     }
 
-    // This following section will display the table with the records of individuals.
     return (
         <div className="row">
             <div className="col-3 mt-5">
@@ -266,47 +399,114 @@ export default function RecordList(props) {
             </div>
             <div className="col-6 text-center">
                 Lending protocol section
+                <button className='btn btn-primary' onClick={() => getRequestEvents()}>Request Events</button>
+
+                {/* <button className='btn btn-primary' onClick={() => testing()}>Testing</button> */}
                 <div className="row justify-content-center mt-5">
                     <div className="card text-bg-dark text-center" style={{ width: "80%" }}>
-                        <div className='card-header'>Request To Borrow</div>
-                        <div className="card-body">
+                        <div className="btn-group my-3" role="group" aria-label="Basic radio toggle button group">
+                            <input type="radio" className="btn-check" name="btnradio" onClick={() => setShowRepaymentCard(false)} id="btnradio1" autoComplete="off" />
+                            <label className="btn btn-outline-primary" htmlFor="btnradio1">Borrow</label>
 
-                            <form>
-                                <div className="mb-3">
-                                    <label for="inputAddress" class="form-label">From</label>
-                                    <input type="text" class="form-control" id="inputAddress"
-                                        aria-describedby="addressHelp" value={requestAddressVal}
-                                        placeholder="0x0000000000000000000000000000000000000000" required ref={reqAddress} />
-                                </div>
-                                <div className="my-2">
-                                    <label for="inputAmount" class="form-label">Amount</label>
-                                </div>
-                                <div className="input-group mb-3">
-                                    <input ref={requestAmount} type="number" class="form-control" id="inputAmount" aria-describedby="amountHelp" placeholder="0.0" required />
-                                    <span class="input-group-text" id="basic-addon2">
-                                        <div class="dropdown">
-                                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <b>{requestToken}</b>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-dark">
-                                                <li><a href="#" class="btn btn-link dropdown-item" onClick={() => setRequestToken("USDc")}>USDc</a></li>
-                                                <li><a href="#" class="btn btn-link dropdown-item" onClick={() => setRequestToken("ETH")}>ETH</a></li>
-                                            </ul>
-                                        </div>
-                                    </span>
-                                </div>
-                                <div class="d-grid gap-2 col-6 mx-auto">
-                                    <button className="btn btn-primary" type="button" onClick={() => onSubmitRequest()}>Send Request</button>
-                                </div>
-                            </form>
+                            <input type="radio" className="btn-check" name="btnradio" onClick={() => setShowRepaymentCard(true)} id="btnradio2" autoComplete="off" />
+                            <label className="btn btn-outline-primary" htmlFor="btnradio2">Repay</label>
                         </div>
+                        {showRepaymentCard ? (
+                            <>
+                                <div className="card-body">
+                                    <form>
+                                        <div className="mt-4 mb-2">
+                                            <label htmlFor="inputAddress" className="form-label"><h4>To</h4></label>
+                                            <input type="text" className="form-control" id="inputAddress"
+                                                aria-describedby="addressHelp" value={requestAddressVal}
+                                                placeholder="0x0000000000000000000000000000000000000000" required ref={reqAddress} />
+                                        </div>
+                                        <div className="mt-4 mb-2">
+                                            <label htmlFor="inputAmount" className="form-label"><h4>Amount</h4></label>
+                                        </div>
+                                        <div className="input-group mb-3">
+                                            <input ref={requestAmount} type="number" className="form-control" id="inputAmount" aria-describedby="amountHelp" placeholder="0.0" required />
+                                            <span className="input-group-text" id="basic-addon2">
+                                                <div className="dropdown">
+                                                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <b>{requestToken}</b>
+                                                    </button>
+                                                    <ul className="dropdown-menu dropdown-menu-dark">
+                                                        <li><a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("USDc")}>USDc</a></li>
+                                                        <li><a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("ETH")}>ETH</a></li>
+                                                    </ul>
+                                                </div>
+                                            </span>
+                                        </div>
+                                        <div className="d-grid gap-2 col-6 mx-auto mt-5 mb-3">
+                                            <button className="btn btn-primary" type="button" onClick={() => submitRepayRequest()}>Repay</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </>) : (
+                            <>
+                                <div className="card-body">
+                                    <form>
+                                        <div className="mt-4 mb-2">
+                                            <label htmlFor="inputAddress" className="form-label"><h4>From</h4></label>
+                                            <input type="text" className="form-control" id="inputAddress"
+                                                aria-describedby="addressHelp" value={requestAddressVal}
+                                                placeholder="0x0000000000000000000000000000000000000000" required ref={reqAddress} />
+                                        </div>
+                                        <div className="mt-4 mb-2">
+                                            <label htmlFor="inputAmount" className="form-label"><h4>Amount</h4></label>
+                                        </div>
+                                        <div className="input-group mb-3">
+                                            <input ref={requestAmount} type="number" className="form-control" id="inputAmount" aria-describedby="amountHelp" placeholder="0.0" required />
+                                            <span className="input-group-text" id="basic-addon2">
+                                                <div className="dropdown">
+                                                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <b>{requestToken}</b>
+                                                    </button>
+                                                    <ul className="dropdown-menu dropdown-menu-dark">
+                                                        <li><a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("USDc")}>USDc</a></li>
+                                                        <li><a href="#" className="btn btn-link dropdown-item" onClick={() => setRequestToken("ETH")}>ETH</a></li>
+                                                    </ul>
+                                                </div>
+                                            </span>
+                                        </div>
+                                        <div className="d-grid gap-2 col-6 mx-auto mt-5 mb-3">
+                                            <button className="btn btn-primary" type="button" onClick={() => onSubmitRequest()}>Send Request</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </>
+                        )}
+
                     </div>
+                </div>
+                <div className="row justify-content-center my-5">
+                    <h4>Histories</h4>
+                    <div className="btn-group my-3" role="group" aria-label="Basic radio toggle button group">
+                        <input type="radio" className="btn-check" name="btnradio" id="btnradio3" onClick={() => setHistoryType("Lending")} autoComplete="off" />
+                        <label className="btn btn-outline-primary" htmlFor="btnradio3">Lending</label>
+
+                        <input type="radio" className="btn-check" name="btnradio" id="btnradio4" onClick={() => setHistoryType("Borrowing")} autoComplete="off" />
+                        <label className="btn btn-outline-primary" htmlFor="btnradio4">Borrowing</label>
+
+                        <input type="radio" className="btn-check" name="btnradio" id="btnradio5" onClick={() => setHistoryType("Repayment")} autoComplete="off" />
+                        <label className="btn btn-outline-primary" htmlFor="btnradio5">Repayment</label>
+                    </div>
+                    fffff
+                    <GetHistoryEvents />
+                    {/* {borrowEvents[0]}
+                    Borrowing
+                    <BorrowEventsComponent />
+
+                    Lending
+                    <LendEventsComponent /> */}
                 </div>
             </div>
             <div className="col-3 text-center mt-5">
                 Requests section
                 {requestList()}
             </div>
-        </div>
+        </div >
     );
 }
