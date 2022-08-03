@@ -6,6 +6,10 @@ and earns a passive income as lenders.
 
 Website - https://uni3-credit-card.vercel.app/
 
+Smart Contracts Repository - [Uni3 Smart Contracts](https://github.com/aditya172926/uni3_cards_contracts)
+
+Backend Repository - [Uni3 backend](https://github.com/aditya172926/Uni3_card_backend)
+
 ## <p align="center">Technologies Used</p>
 Website
 - Ether js
