@@ -65,9 +65,9 @@
 				"type": "string"
 			},
 			{
-				"internalType": "uint16",
+				"internalType": "uint256",
 				"name": "amount",
-				"type": "uint16"
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
@@ -97,9 +97,9 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "uint32",
+				"internalType": "uint256",
 				"name": "amount",
-				"type": "uint32"
+				"type": "uint256"
 			},
 			{
 				"indexed": false,
@@ -119,19 +119,19 @@
 				"type": "address"
 			},
 			{
-				"internalType": "uint16",
+				"internalType": "uint256",
 				"name": "_amount",
-				"type": "uint16"
+				"type": "uint256"
 			},
 			{
-				"internalType": "uint16",
+				"internalType": "uint256",
 				"name": "interest_payment",
-				"type": "uint16"
+				"type": "uint256"
 			},
 			{
-				"internalType": "uint16",
+				"internalType": "uint256",
 				"name": "treasury_amount",
-				"type": "uint16"
+				"type": "uint256"
 			}
 		],
 		"name": "repay",
@@ -169,15 +169,15 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "uint32",
+				"internalType": "uint256",
 				"name": "borrowed_amount",
-				"type": "uint32"
+				"type": "uint256"
 			},
 			{
 				"indexed": false,
-				"internalType": "uint32",
+				"internalType": "uint256",
 				"name": "amount_paid",
-				"type": "uint32"
+				"type": "uint256"
 			},
 			{
 				"indexed": false,
@@ -210,9 +210,9 @@
 				"type": "uint8"
 			},
 			{
-				"internalType": "uint16",
+				"internalType": "uint256",
 				"name": "",
-				"type": "uint16"
+				"type": "uint256"
 			},
 			{
 				"internalType": "string",
