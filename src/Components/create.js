@@ -40,12 +40,9 @@ export default function Create(props) {
         }
     }
 
-    useEffect(() => {
-        getresp();
-    });
-
     async function onSubmit(e) {
         e.preventDefault();
+        await getresp();
 
         // When a post request is sent to the create url, we'll add a new record to the database.
         const newPerson = { ...form };

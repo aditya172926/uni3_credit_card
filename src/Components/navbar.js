@@ -127,26 +127,12 @@ export default function Navbar(props) {
 
                 </div>
             </nav>
-            <Modal show={showSwapModal} onHide={onHideModal} centered className="connectWalletModal">
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        Swap Tokens
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="container">
-                        <br></br>
-                        <div className="row">
-                            <div className="col text-center">
-                                <div className="Uniswap">
-                                    <SwapWidget
-                                        provider={provider}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </Modal.Body>
+            <Modal show={showSwapModal} onHide={onHideModal} centered>
+                <div className="container text-center p-5 ms-3">
+                    <SwapWidget
+                        provider={provider}
+                    />
+                </div>
             </Modal>
         </>
     );
