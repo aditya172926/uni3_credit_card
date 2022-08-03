@@ -224,7 +224,7 @@ export default function RecordList(props) {
                 return (
                     // <p key={index}>{result.data}</p>
                     <div className="alert alert-primary" role="alert" key={index}>
-                        From - {from.substring(0, 8)}...{from.substring(38)} | To - {to.substring(0, 8)}...{to.substring(38)} | Amount - {parseInt(result.data, 16)} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
+                        From - {from.substring(0, 8)}...{from.substring(38)} | To - {to.substring(0, 8)}...{to.substring(38)} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open Blockexplorer</a>
                     </div>
                 );
             })
@@ -237,11 +237,13 @@ export default function RecordList(props) {
                 let blockexplorer_link = `https://goerli.etherscan.io/tx/${result.transactionHash}`;
                 let to = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.data.substring(0, 66)));
                 let from = ethers.utils.getAddress(ethers.utils.hexStripZeros(result.topics[1]));
-                let amount = parseInt(result.data.substring(66, 130), 16);
+                // let amount = parseInt(result.data.substring(66, 130), 16);
+                // console.log(amount)
+                // amount = amount * (10 ** (-result.decimal_places));
                 return (
                     // <p key={index}>{result.data}</p>
                     <div className="alert alert-primary" role="alert" key={index}>
-                        To - {to.substring(0, 8)}...{to.substring(38)} | From - {from.substring(0, 8)}...{from.substring(38)} | Amount - {amount} | <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open</a>
+                        To - {to.substring(0, 8)}...{to.substring(38)} | From - {from.substring(0, 8)}...{from.substring(38)} |  <a href={blockexplorer_link} target="_blank" rel="noreferrer">Open Blockexplorer</a>
                     </div>
                 )
             })
@@ -357,16 +359,16 @@ export default function RecordList(props) {
             let amount_requested = parseInt(request.amount, 10);
             console.log(amount_requested)
             return (
-                <div className="accordion accordion-flush" style={{ backgroundColor: "#3B0847" }} id="requests_accordion">
-                    <div className="accordion-item" style={{ backgroundColor: "#3B0847" }}>
+                <div className="accordion accordion-flush" style={{ backgroundColor: "transparent" }} id="requests_accordion">
+                    <div className="accordion-item" style={{ backgroundColor: "transparent" }}> 
                         <h2 className="accordion-header" id={index}>
                             <div className="d-flex">
-                                <button className="accordion-button collapsed" style={{ backgroundColor: "#3B0847", color: "white" }}
+                                <button className="accordion-button collapsed my-1" style={{ backgroundColor: "transparent", color: "#3B0847" }}
                                     type="button" data-bs-toggle="collapse" data-bs-target={accordion_id}
                                     aria-expanded="false" aria-controls={control_accordion}>
                                     {request.borrower.substring(0, 8)}...{request.borrower.substring(38)}
                                 </button>
-                                <button className="btn btn-primary py-0" style={{ height: "42px" }}
+                                <button className="btn btn-primary py-0 mt-1" style={{ height: "42px", backgroundColor:"#3B0847" }}
                                     type="button" onClick={() => grantBorrowRequest(
                                         amount_requested,
                                         index,
@@ -382,7 +384,7 @@ export default function RecordList(props) {
                             style={{ backgroundColor: "white" }} aria-labelledby={index} data-bs-parent="#requests_accordion">
                             <div className="d-flex align-items-center">
                                 <div className="accordion-body">
-                                    Amount - {amount_requested} {request.tokenType}
+                                    Amount - {amount_requested * (10 ** (-request.decimal_places))} {request.tokenType}
                                 </div>
                             </div>
                         </div>
@@ -563,13 +565,14 @@ export default function RecordList(props) {
                 </div>
             </div>
             <div className="col-3 text-center mt-5">
-                Requests section
                 {showRepaymentCard ? (
                     <>
+                    <h4>Pending Repayments</h4>
                         <RepayComponent />
                     </>
                 ) : (
                     <>
+                    <h4>Borrow Requests</h4>
                         {requestList()}
                     </>
 

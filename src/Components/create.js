@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 export default function Create(props) {
@@ -9,7 +9,6 @@ export default function Create(props) {
 
     const address = props.address;
     const addressInd = props.addressInd;
-    console.log(window.addressInd);
     console.log("Adding contact to this address ", addressInd);
     const [form, setForm] = useState({
         name: "",
@@ -22,8 +21,6 @@ export default function Create(props) {
     const [currentUserId, setCurrentUserId] = useState(0);
 
     const navigate = useNavigate();
-    const params = useParams();
-
 
     // these methods will update the state variables
     function updateForm(value) {
@@ -42,6 +39,10 @@ export default function Create(props) {
             setContactExist(true);
         }
     }
+
+    useEffect(() => {
+        getresp();
+    });
 
     async function onSubmit(e) {
         e.preventDefault();
@@ -77,48 +78,52 @@ export default function Create(props) {
 
     // this displays the form and takes input from the user
     return (
-        <div>
-            <h3>Create New Record</h3>
+        <div className='container text-center' style={{width: "50%"}}>
+            <h3 className='my-4'>Add New Contact</h3>
             <form onSubmit={onSubmit}>
-                <div className="form-group">
+                <div className="form-group my-4">
                     <label htmlFor="name">Name</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control my-4"
                         id="name"
                         value={form.name}
                         onChange={(e) => updateForm({ name: e.target.value })}
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group my-4">
                     <label htmlFor="user_address">Address</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control my-4"
                         id="user_address"
+                        placeholder='0x0000000000000000000000000000000000000000'
                         value={form.user_address}
                         onChange={(e) => updateForm({ user_address: e.target.value })}
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group my-4">
                     <label htmlFor="blockexplorer_link">Block explorer Link</label>
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control my-4"
                         id="blockexplorer_link"
+                        placeholder='Optional'
                         value={form.blockexplorer_link}
                         onChange={(e) => updateForm({ blockexplorer_link: e.target.value })}
                     />
                 </div>
-                <div className="form-group">
+                <div className="form-group my-4">
                     <input
                         type="submit"
-                        value="Create person"
+                        value="Add Contact"
                         className="btn btn-primary"
                     />
                 </div>
+                <br />
+                <br />
+                
             </form>
-            <button className='btn btn-primary' onClick={getresp}>test</button>
         </div>
     )
 }

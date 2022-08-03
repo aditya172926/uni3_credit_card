@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { ethers } from 'ethers';
-import {Modal} from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 
 import Navbar from "./Components/navbar";
 import RecordList from "./Components/recordList";
@@ -31,6 +31,7 @@ function App() {
     networkName: "",
     chainId: ""
   });
+  const [showLoading, setShowLoading] = useState(false);
 
   const connectWallet = async () => {
     try {
@@ -39,6 +40,7 @@ function App() {
         alert("Get Metamask");
         return;
       }
+      setShowLoading(true);
       const accounts = await ethereum.request({ method: "eth_requestAccounts" });
       console.log("Connected to account, ", accounts[0]);
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
@@ -59,9 +61,12 @@ function App() {
       console.log(window.addressInd);
       console.log(addressInd);
       await setAddressIndex(addressInd);
+      setShowLoading(false);
       await setWalletConnected(true);
+
     } catch (error) {
       console.log(error);
+      setShowLoading(false);
     }
   }
 
@@ -119,9 +124,10 @@ function App() {
         uni: UNI_balance
       });
       console.log(tokenBalances);
-
+      setShowLoading(false);
     } else {
       console.log("No authorized account found");
+      setShowLoading(false);
     }
   }
 
@@ -157,13 +163,9 @@ function App() {
         ) : (<>
           <Modal show={!walletConnected} centered className="connectWalletModal">
             <Modal.Body>
-              <div className="container">
+              <div className="container text-center">
                 <br></br>
                 <div className="row">
-                  <div className="col">
-                    <h5>Borrow from your peers
-                    </h5>
-                  </div>
                   <div className="col text-center">
                     <p>Connect your Metamask wallet</p>
                     <button id="connectWallet" className="btn btn-primary" onClick={() => connectWallet()}>
@@ -171,6 +173,11 @@ function App() {
                     </button>
                   </div>
                 </div>
+                {showLoading ? (
+                  <div class="spinner-border text-info mt-5" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                ) : (<></>)}
               </div>
             </Modal.Body>
           </Modal>
