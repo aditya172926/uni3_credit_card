@@ -4,6 +4,8 @@ Uni3 is a digital credit card that allows people to borrow money from their fami
 co-workers or connections. This enables the peer network that financially backs one another
 and earns a passive income as lenders.
 
+Website - https://uni3-credit-card.vercel.app/
+
 ## <p align="center">Technologies Used</p>
 Website
 - Ether js
