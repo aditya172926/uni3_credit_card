@@ -16,7 +16,7 @@ const digitalcard_abi = require('./utils/Digitalcard_abi.json');
 
 function App() {
 
-  const contractAddress = "0x6852A4cFf71f50Bf1AeE440F70DF318e3113A4b3";
+  const contractAddress = "0xACc7b2B27BF44314248b4d3F8960D93Ce8e137b3";
 
   const [walletConnected, setWalletConnected] = useState(false);
   const [connectedAddress, setConnectedAddress] = useState("");

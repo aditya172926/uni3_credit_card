@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 
 const digitalcard_abi = require('../utils/Digitalcard_abi.json');
 const erc20_abi = require('../utils/erc20_abi.json');
@@ -36,6 +36,7 @@ export default function RecordList(props) {
     const [showRepaymentCard, setShowRepaymentCard] = useState(false);
     const [historyType, setHistoryType] = useState("Lending");
     const [repayBorrow, setRepayBorrow] = useState({});
+    const [pendingTxn, setPedingTxn] = useState(false);
 
     // contract events
     const [borrowEvents, setBorrowEvents] = useState([]);
@@ -212,7 +213,7 @@ export default function RecordList(props) {
 
     useEffect(() => {
         getRequestEvents();
-    },[props.address, props.currentNetwork]);
+    }, [props.address, props.currentNetwork]);
 
     function BorrowEventsComponent() {
         return (
@@ -266,15 +267,23 @@ export default function RecordList(props) {
         const contract = new ethers.Contract(USDcAddress, erc20_abi, signer);
         console.log(contract);
         console.log(_price);
-        let amount = (_price * (10 ** 6));
-        console.log(amount);
-        amount = Math.ceil(amount);
+        // let amount = (_price * (10 ** 6));
+        // console.log(amount);
+        let amount = Math.ceil(_price);
         console.log(amount);
         const result = await contract.approve(props.contractAddress, amount.toString());
         await result.wait();
         console.log(result);
 
         return result;
+    }
+
+    function ShowTransactionAlert(transaction_hash) {
+        return (
+            <div className="alert" role="alert">
+                {transaction_hash}
+            </div>
+        )
     }
 
     const grantBorrowRequest = async (amount, index, tokenType, borrower, decimal_places) => {
@@ -285,8 +294,14 @@ export default function RecordList(props) {
                 const uni3contract = await connectToContract();
                 let grant_amount = amount * (10 ** (6 - decimal_places));
                 await approve(grant_amount);
+                // grant_amount = amount * (10 ** (decimal_places));
+                // grant_amount = ethers.utils.formatUnits(grant_amount, 6);
+
+                // grant_amount = BigNumber.from(amount).mul(BigNumber.from(10).pow(6));
                 const lendTxn = await uni3contract.lendTokens(borrower, tokenType, grant_amount, index);
+                setPedingTxn(true);
                 console.log("Mining...", lendTxn.hash);
+                ShowTransactionAlert(lendTxn.hash);
                 await lendTxn.wait();
                 console.log("Mined -- ", lendTxn.hash);
             }
@@ -297,7 +312,7 @@ export default function RecordList(props) {
 
     const submitRepayRequest = async (to, amount, installment, decimal_places) => {
         console.log("Repay request made");
-        let repay_amount = requestAmount.current.value * (10 ** (6 - decimal_places));
+        let repay_amount = requestAmount.current.value * (10 ** (6));
         // let repay_amount = requestAmount.current.value;
         let interest_amt;
         let treasury_amt;
@@ -310,6 +325,9 @@ export default function RecordList(props) {
         } else if (installment == 1) {
             interest_amt = repay_amount * 0.03;
             treasury_amt = repay_amount * 0.015;
+        } else {
+            console.log("You have exhaused your installments");
+            return;
         }
         console.log(interest_amt, treasury_amt);
         const { ethereum } = window;
@@ -321,6 +339,8 @@ export default function RecordList(props) {
                 await approve(repay_amount + interest_amt + treasury_amt);
                 const repayTxn = await uni3contract.repay(to, repay_amount, interest_amt, treasury_amt);
                 console.log("Mining...", repayTxn.hash);
+                setPedingTxn(true);
+                ShowTransactionAlert(repayTxn.hash);
                 await repayTxn.wait();
                 console.log("Mined -- ", repayTxn.hash);
             }
@@ -334,6 +354,8 @@ export default function RecordList(props) {
             console.log(request);
             let accordion_id = "#collapse" + index;
             let control_accordion = "collapse" + index;
+            let amount_requested = parseInt(request.amount, 10);
+            console.log(amount_requested)
             return (
                 <div className="accordion accordion-flush" style={{ backgroundColor: "#3B0847" }} id="requests_accordion">
                     <div className="accordion-item" style={{ backgroundColor: "#3B0847" }}>
@@ -346,7 +368,7 @@ export default function RecordList(props) {
                                 </button>
                                 <button className="btn btn-primary py-0" style={{ height: "42px" }}
                                     type="button" onClick={() => grantBorrowRequest(
-                                        request.amount,
+                                        amount_requested,
                                         index,
                                         request.tokenType,
                                         request.borrower,
@@ -360,7 +382,7 @@ export default function RecordList(props) {
                             style={{ backgroundColor: "white" }} aria-labelledby={index} data-bs-parent="#requests_accordion">
                             <div className="d-flex align-items-center">
                                 <div className="accordion-body">
-                                    Amount - {request.amount} {request.tokenType}
+                                    Amount - {amount_requested} {request.tokenType}
                                 </div>
                             </div>
                         </div>
