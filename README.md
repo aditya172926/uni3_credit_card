@@ -1,3 +1,14 @@
+# <p align="center">Hacktoberfest 2022</p>
+👋 Hi Hackers, its a great day if you stumbled on this repository from anywhere
+
+To start contributing to this repository, checkout the [Contributing guidelines](https://github.com/aditya172926/uni3_credit_card/blob/main/CONTRIBUTING.md)
+
+All the Repositories (Smart contracts, Backend and Frontend) are also Open for Contributions
+
+To know more about this project, continue reading...
+
+Give this Repository a ⭐
+
 # <p align="center">Uni3 Borrowing Contracts</p>
 
 Uni3 is a digital credit card that allows people to borrow money from their family, friends,
